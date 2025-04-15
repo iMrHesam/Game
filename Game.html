@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بازی تطابق کارت</title>
+  <style>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+    background-color: #def;
+}
+
+.game-container {
+    width: 380px;
+    height: 720px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    background: #ff8700;
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid #000000;
+}
+
+.card {
+    padding: 10px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    color: #000000;
+    cursor: pointer;
+    border-radius: 5px;
+    position: relative;
+    transition: transform 0.5s;
+    transform-style: preserve-3d;
+}
+
+.front,
+.back { 
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    border: 1px solid #000000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    backface-visibility: hidden;
+}
+
+.front {
+    background: #00d5d5;
+}
+
+.back {
+    transform: rotateY(180deg);
+    background: #ffffff;
+}
+
+.flipped {
+    transform: rotateY(180deg);
+}
+
+.matched .back {
+	background: #dddddd;
+    border: 2px solid #00ff00;
+    opacity: 0.8;
+}
+
+  </style>
+</head>
+<body>
+
+  <div id="game-container" class="game-container"></div>
+
+    <script>
+
+    const emojiGroups = {
+      fruits: ["🍊", "🍋", "🍓", "🍇", "🥝", "🍍", "🍌", "🥭", "🍒", "🍑", "🍉", "🍐", "🥥", "🥑", "🍎", "🍏", "🫐", "🍠", "🌶️", "🍆", "🥦", "🥕", "🥬", "🌽", "🍅"],
+      emotions: ["😉", "😊", "😍", "😎", "🥺", "😅", "😜", "😃", "😂", "🤣", "😋", "😘", "😇", "🙃", "🤯", "🙄", "😳", "☹️", "😤", "😡", "🥸", "🤓", "😁", "🫠", "😭"],
+      animals: ["🐶", "🐱", "🐭", "🐹", "🐰", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐸", "🐵", "🦄", "🦜", "🦍", "🦉", "🦅", "🐃", "🐑", "🦬", "🦚", "🐋", "🐧"]
+    };
+
+    let currentEmojis = [];
+    let flippedCards = [];
+    let matchedCards = 0;
+    
+    const gameContainer = document.getElementById("game-container");
+
+    const shuffle = array => {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    };
+
+    const createCards = () => {
+      gameContainer.innerHTML = "";
+      const groupKeys = Object.keys(emojiGroups);
+      const randomGroup = groupKeys[Math.floor(Math.random() * groupKeys.length)];
+      currentEmojis = emojiGroups[randomGroup];
+
+      const cardsArray = shuffle([...currentEmojis, ...currentEmojis]);
+      cardsArray.forEach(emoji => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `<div class="back">${emoji}</div><div class="front">❓</div>`;
+        card.addEventListener("click", () => flipCard(card));
+        gameContainer.appendChild(card);
+      });
+    };
+
+    const flipCard = card => {
+      if (flippedCards.length === 2 || card.classList.contains("flipped") || card.classList.contains("matched")) return;
+      card.classList.add("flipped");
+      const front = card.querySelector(".front");
+      front.textContent = ""; // علامت ❓ حذف میشه
+      flippedCards.push(card);
+      if (flippedCards.length === 2) checkMatch();
+    };
+
+    const checkMatch = () => {
+      const [c1, c2] = flippedCards;
+      const back1 = c1.querySelector(".back").textContent;
+      const back2 = c2.querySelector(".back").textContent;
+      const isMatch = back1 === back2;
+      setTimeout(() => {
+        if (isMatch) {
+          c1.classList.add("matched");
+          c2.classList.add("matched");
+          matchedCards += 2;
+        } else {
+          c1.classList.remove("flipped");
+          c2.classList.remove("flipped");
+        }
+        flippedCards = [];
+      }, 700);
+    };
+
+    createCards();
+
+    </script>
+</body>
+</html>
